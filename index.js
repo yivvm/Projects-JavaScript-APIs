@@ -2,7 +2,7 @@
 // import axios from "axios";
 
 // The breed selection input element.
-const breedSelect = document.getElementById("breedSelect");
+// const breedSelect = document.getElementById("breedSelect");  // place inside the function, guarantee that the element is obtained when the function is called, which is typically after the HTML has been loaded, preventing the "TypeError: null is not an object (evaluating 'breedSelect.appendChild')" error.
 // The information section div element.
 const infoDump = document.getElementById("infoDump");
 // The progress bar div element.
@@ -11,7 +11,7 @@ const progressBar = document.getElementById("progressBar");
 const getFavouritesBtn = document.getElementById("getFavouritesBtn");
 
 // Step 0: Store your API key here for reference and easy access.
-const API_KEY = "";
+const API_KEY = "live_EellOTjtNVybqKeQCOonBZ4M1Iqr3FQfvqTjAcUI8KKjkxkEcWYiwOMKnyhBYPOL";
 
 
 // from Carousel.js ------------
@@ -101,32 +101,32 @@ function start() {
  *  - Each option should display text equal to the name of the breed.
  * This function should execute immediately.
  */
-const breedsUrl = 'https://api.thecatapi.com/v1/breeds';
+// const breedsUrl = 'https://api.thecatapi.com/v1/breeds';
 
-async function initialLoad() {
-  try {
-    const response = await fetch(breedsUrl);
+// async function initialLoad() {
+//   try {
+//     const response = await fetch(breedsUrl);
 
-    if (!response.ok) {
-      throw new Error('Failed to retrieve breeds.')
-    }
+//     if (!response.ok) {
+//       throw new Error('Failed to retrieve breeds.')
+//     }
 
-    const breeds = await response.json();
-    
-    const breedSelect = document.getElementById('breedSelect');
+//     const breeds = await response.json();
+//     const breedSelect = document.getElementById("breedSelect");  // place inside the function, guarantee that the element is obtained when the function is called, which is typically after the HTML has been loaded, preventing the "TypeError: null is not an object (evaluating 'breedSelect.appendChild')" error.
 
-    breeds.forEach((breed) => {
-      const option = document.createElement('option');
-      option.value = breed.id;
-      option.textContent = breed.name;
-      breedSelect.appendChild(option);
-    });
-  } catch(error) {
-    console.error('Error', error);
-  }
-}
+//     breeds.forEach((breed) => {
+//       const option = document.createElement('option');
+//       option.value = breed.id;
+//       option.textContent = breed.name;
+//       breedSelect.appendChild(option);
+//     });
+//   } catch(error) {
+//     console.error('Error', error);
+//   }
+// }
 
-initialLoad();
+// initialLoad();
+
 
 /**
  * 2. Create an event handler for breedSelect that does the following:
@@ -142,6 +142,32 @@ initialLoad();
  * - Each new selection should clear, re-populate, and restart the Carousel.
  * - Add a call to this function to the end of your initialLoad function above to create the initial carousel.
  */
+const breedsUrl = 'https://api.thecatapi.com/v1/breeds';
+
+async function initialLoad() {
+  try {
+    const response = await fetch(breedsUrl);
+
+    if (!response.ok) {
+      throw new Error('Failed to retrieve breeds.')
+    }
+
+    const breeds = await response.json();
+    const breedSelect = document.getElementById("breedSelect");  // place inside the function, guarantee that the element is obtained when the function is called, which is typically after the HTML has been loaded, preventing the "TypeError: null is not an object (evaluating 'breedSelect.appendChild')" error.
+
+    breeds.forEach((breed) => {
+      const option = document.createElement('option');
+      option.value = breed.id;
+      option.textContent = breed.name;
+      breedSelect.appendChild(option);
+    });
+  } catch(error) {
+    console.error('Error', error);
+  }
+}
+
+initialLoad();
+
 
 
 /**
