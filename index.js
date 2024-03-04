@@ -153,7 +153,7 @@ async function initialLoad() {
     }
 
     const breeds = await response.json();
-    // const breedSelect = document.getElementById("breedSelect");  // place inside the function, guarantee that the element is obtained when the function is called, which is typically after the HTML has been loaded, preventing the "TypeError: null is not an object (evaluating 'breedSelect.appendChild')" error.
+    // const breedSelect = document.getElementById("breedSelect");  // Place inside the function, guarantee that the element is obtained when the function is called, which is typically after the HTML has been loaded, preventing the "TypeError: null is not an object (evaluating 'breedSelect.appendChild')" error.
 
     // console.log(breeds);
     breeds.forEach((breed) => {
@@ -166,7 +166,7 @@ async function initialLoad() {
 
     // console.log(breedSelect)
 
-    // create event handler for breedSelect
+    // Create event handler for breedSelect
     breedSelect.addEventListener('change', async(e) => {
       const selectBreedId = e.target.value;
       await retrieveBreedInfo(selectBreedId, breeds);
@@ -200,11 +200,11 @@ async function retrieveBreedInfo(breedId, breeds) {
   const carouselInner = document.getElementById('carouselInner');
   // const inforDump = document.getElementById('infoDump')
 
-  // clear exisiting carousel and infoDump content
+  // Clear exisiting carousel and infoDump content
   carouselInner.innerHTML = "";
   infoDump.innerHTML = "";
 
-  // for each carousel with breed images
+  // For each carousel with breed images
   breedImg.forEach((info) => {
     const carouselItem = document.createElement('div');
     carouselItem.classList.add('carousel-item');
@@ -219,7 +219,7 @@ async function retrieveBreedInfo(breedId, breeds) {
   });
 
   
-  // create information session within the infoDump element.
+  // Create information session within the infoDump element.
   const infoDumpContent = `
     <h2>${selectBreedInfo.name}</h2>
     <p><strong>Description:</strong> ${selectBreedInfo.description}</p>
