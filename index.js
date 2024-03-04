@@ -2,7 +2,7 @@
 // import axios from "axios";
 
 // The breed selection input element.
-// const breedSelect = document.getElementById("breedSelect");  // place inside the function, guarantee that the element is obtained when the function is called, which is typically after the HTML has been loaded, preventing the "TypeError: null is not an object (evaluating 'breedSelect.appendChild')" error.
+const breedSelect = document.getElementById("breedSelect");  // place inside the function, guarantee that the element is obtained when the function is called, which is typically after the HTML has been loaded, preventing the "TypeError: null is not an object (evaluating 'breedSelect.appendChild')" error.
 // The information section div element.
 const infoDump = document.getElementById("infoDump");
 // The progress bar div element.
@@ -153,14 +153,29 @@ async function initialLoad() {
     }
 
     const breeds = await response.json();
-    const breedSelect = document.getElementById("breedSelect");  // place inside the function, guarantee that the element is obtained when the function is called, which is typically after the HTML has been loaded, preventing the "TypeError: null is not an object (evaluating 'breedSelect.appendChild')" error.
+    // const breedSelect = document.getElementById("breedSelect");  // place inside the function, guarantee that the element is obtained when the function is called, which is typically after the HTML has been loaded, preventing the "TypeError: null is not an object (evaluating 'breedSelect.appendChild')" error.
 
+    // console.log(breeds);
     breeds.forEach((breed) => {
       const option = document.createElement('option');
       option.value = breed.id;
       option.textContent = breed.name;
       breedSelect.appendChild(option);
+      // console.log(option)
     });
+
+    // console.log(breedSelect)
+
+    // create event handler for breedSelect
+    breedSelect.addEventListener('change', async(e) => {
+      const selectBreedId = e.target.value;
+      await retrieveBreedInfo(selectBreedId, breeds);
+      // console.log(selectBreedId)
+    });
+
+    // console.log(breedSelect.value)
+    retrieveBreedInfo(breedSelect.value, breeds);  // as a default
+
   } catch(error) {
     console.error('Error', error);
   }
@@ -168,7 +183,54 @@ async function initialLoad() {
 
 initialLoad();
 
+async function retrieveBreedInfo(breedId, breeds) {
+  const selectBreedInfo = breeds.find(breed => breed.id === breedId)
+  console.log(selectBreedInfo)
 
+  const breedImgUrl = `https://api.thecatapi.com/v1/images/search?breed_ids=${breedId}`;
+  const response = await fetch(breedImgUrl);
+
+  if (!response.ok) {
+    throw new Error('Failed to retrieve breed information.');
+  }
+
+  const breedImg = await response.json();
+  // console.log(breedImg)
+
+  const carouselInner = document.getElementById('carouselInner');
+  // const inforDump = document.getElementById('infoDump')
+
+  // clear exisiting carousel and infoDump content
+  carouselInner.innerHTML = "";
+  infoDump.innerHTML = "";
+
+  // for each carousel with breed images
+  breedImg.forEach((info) => {
+    const carouselItem = document.createElement('div');
+    carouselItem.classList.add('carousel-item');
+
+    const img = document.createElement('img');
+    img.src = info.url;
+    img.classList.add('d-block', 'w-100');
+    img.alt = 'breed image';
+
+    carouselItem.appendChild(img);
+    carouselInner.appendChild(carouselItem);
+  });
+
+  
+  // create information session within the infoDump element.
+  const infoDumpContent = `
+    <h2>${selectBreedInfo.name}</h2>
+    <p><strong>Description:</strong> ${selectBreedInfo.description}</p>
+    <p><strong>Temperament:</strong> ${selectBreedInfo.temperament}</p>
+    <p><strong>Origin:</strong> ${selectBreedInfo.origin}</p>
+    <p><strong>Life span:</strong> ${selectBreedInfo.life_span}</p>
+    <p><strong>Its wikipedia page:</strong> ${selectBreedInfo.wikipedia_url}</p>
+  `;
+  infoDump.innerHTML = infoDumpContent;
+
+}
 
 /**
  * 3. Fork your own sandbox, creating a new one named "JavaScript Axios Lab."
