@@ -102,7 +102,6 @@ function start() {
  * This function should execute immediately.
  */
 
-
 /**
  * 2. Create an event handler for breedSelect that does the following:
  * - Retrieve information on the selected breed from the cat API using fetch().
@@ -130,6 +129,80 @@ function start() {
  *   by setting a default header with your API key so that you do not have to
  *   send it manually with all of your requests! You can also set a default base URL!
  */
+
+const breedsUrl = 'https://api.thecatapi.com/v1/breeds';
+
+async function initialLoad() {
+  try {
+    const response = await axios.get(breedsUrl);
+    const breeds = response.data;
+
+    breeds.forEach((breed) => {
+      const option = document.createElement('option');
+      option.value = breed.id;
+      option.textContent = breed.name;
+      breedSelect.appendChild(option);
+    });
+
+    // create event handler for breedSelect
+    breedSelect.addEventListener('change', async(e) => {
+      const selectBreedId = e.target.value;
+      await retrieveBreedInfo(selectBreedId, breeds);
+    });
+
+    retrieveBreedInfo(breedSelect.value, breeds);  // as a default
+
+  } catch(error) {
+    console.error('Error', error);
+  }
+}
+
+initialLoad();
+
+async function retrieveBreedInfo(breedId, breeds) {
+  const selectBreedInfo = breeds.find(breed => breed.id === breedId)
+  // console.log(selectBreedInfo)
+
+  const breedImgUrl = `https://api.thecatapi.com/v1/images/search?breed_ids=${breedId}`;
+  const response = await axios.get(breedImgUrl);
+
+  const breedImg = response.data;
+
+  const carouselInner = document.getElementById('carouselInner');
+  
+  // clear exisiting carousel and infoDump content
+  carouselInner.innerHTML = "";
+  infoDump.innerHTML = "";
+
+  // for each carousel with breed images
+  breedImg.forEach((info) => {
+    const carouselItem = document.createElement('div');
+    carouselItem.classList.add('carousel-item');
+
+    const img = document.createElement('img');
+    img.src = info.url;
+    img.classList.add('d-block', 'w-100');
+    img.alt = 'breed image';
+
+    carouselItem.appendChild(img);
+    carouselInner.appendChild(carouselItem);
+  });
+
+  
+  // create information session within the infoDump element.
+  const infoDumpContent = `
+    <h2>${selectBreedInfo.name}</h2>
+    <p><strong>Description:</strong> ${selectBreedInfo.description}</p>
+    <p><strong>Temperament:</strong> ${selectBreedInfo.temperament}</p>
+    <p><strong>Origin:</strong> ${selectBreedInfo.origin}</p>
+    <p><strong>Life span:</strong> ${selectBreedInfo.life_span}</p>
+    <p><strong>Its wikipedia page:</strong> ${selectBreedInfo.wikipedia_url}</p>
+  `;
+  infoDump.innerHTML = infoDumpContent;
+
+}
+
+
 /**
  * 5. Add axios interceptors to log the time between request and response to the console.
  * - Hint: you already have access to code that does this!

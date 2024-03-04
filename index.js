@@ -185,7 +185,7 @@ initialLoad();
 
 async function retrieveBreedInfo(breedId, breeds) {
   const selectBreedInfo = breeds.find(breed => breed.id === breedId)
-  console.log(selectBreedInfo)
+  // console.log(selectBreedInfo)
 
   const breedImgUrl = `https://api.thecatapi.com/v1/images/search?breed_ids=${breedId}`;
   const response = await fetch(breedImgUrl);
