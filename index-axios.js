@@ -164,12 +164,15 @@ async function retrieveBreedInfo(breedId, breeds) {
   // console.log(selectBreedInfo)
 
   const breedImgUrl = `https://api.thecatapi.com/v1/images/search?breed_ids=${breedId}`;
-  const response = await axios.get(breedImgUrl);
+  const startTime = new Date();
+  const response = await axios.get(breedImgUrl, {
+    metadata: { startTime }
+  });
 
   const breedImg = response.data;
 
   const carouselInner = document.getElementById('carouselInner');
-  
+
   // clear exisiting carousel and infoDump content
   carouselInner.innerHTML = "";
   infoDump.innerHTML = "";
@@ -209,6 +212,31 @@ async function retrieveBreedInfo(breedId, breeds) {
  * - Add a console.log statement to indicate when requests begin.
  * - As an added challenge, try to do this on your own without referencing the lesson material.
  */
+// import axios from 'axios';
+// const axios = require('axios');
+
+// add request interceptor
+axios.interceptors.request.use( (request) => {
+  console.log('Request initiated at: ', new Date().toISOString());
+  return request;
+}, function (error) {
+  return Promise.reject(error);
+});
+
+// add response interceptor
+axios.interceptors.response.use( (response) => {
+  console.log('Response received at: ', new Date().toISOString());
+  const startTime = response.config.metadata.startTime;
+  if (startTime) {
+    const timeDifference = new Date() - startTime;
+    console.log('Time elapsed between request and response: ', timeDifference, 'milliseconds');
+  }
+  return response;
+}, (error) => {
+  console.log('Unsuccessful response...');
+  throw error;
+});
+
 
 /**
  * 6. Next, we'll create a progress bar to indicate the request is in progress.
