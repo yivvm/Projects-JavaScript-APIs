@@ -18,7 +18,7 @@ const API_KEY = "";
 // import * as bootstrap from "bootstrap";
 // import { favourite } from "./index.js";
 
-export function createCarouselItem(imgSrc, imgAlt, imgId) {
+function createCarouselItem(imgSrc, imgAlt, imgId) {
   const template = document.querySelector("#carouselItemTemplate");
   const clone = template.content.firstElementChild.cloneNode(true);
 
@@ -34,14 +34,14 @@ export function createCarouselItem(imgSrc, imgAlt, imgId) {
   return clone;
 }
 
-export function clear() {
+function clear() {
   const carousel = document.querySelector("#carouselInner");
   while (carousel.firstChild) {
     carousel.removeChild(carousel.firstChild);
   }
 }
 
-export function appendCarousel(element) {
+function appendCarousel(element) {
   const carousel = document.querySelector("#carouselInner");
 
   const activeItem = document.querySelector(".carousel-item.active");
@@ -50,7 +50,7 @@ export function appendCarousel(element) {
   carousel.appendChild(element);
 }
 
-export function start() {
+function start() {
   const multipleCardCarousel = document.querySelector(
     "#carouselExampleControls"
   );
@@ -101,6 +101,32 @@ export function start() {
  *  - Each option should display text equal to the name of the breed.
  * This function should execute immediately.
  */
+const breedsUrl = 'https://api.thecatapi.com/v1/breeds';
+
+async function initialLoad() {
+  try {
+    const response = await fetch(breedsUrl);
+
+    if (!response.ok) {
+      throw new Error('Failed to retrieve breeds.')
+    }
+
+    const breeds = await response.json();
+    
+    const breedSelect = document.getElementById('breedSelect');
+
+    breeds.forEach((breed) => {
+      const option = document.createElement('option');
+      option.value = breed.id;
+      option.textContent = breed.name;
+      breedSelect.appendChild(option);
+    });
+  } catch(error) {
+    console.error('Error', error);
+  }
+}
+
+initialLoad();
 
 /**
  * 2. Create an event handler for breedSelect that does the following:
@@ -116,6 +142,7 @@ export function start() {
  * - Each new selection should clear, re-populate, and restart the Carousel.
  * - Add a call to this function to the end of your initialLoad function above to create the initial carousel.
  */
+
 
 /**
  * 3. Fork your own sandbox, creating a new one named "JavaScript Axios Lab."
@@ -168,7 +195,7 @@ export function start() {
  *   you delete that favourite using the API, giving this function "toggle" functionality.
  * - You can call this function by clicking on the heart at the top right of any image.
  */
-export async function favourite(imgId) {
+async function favourite(imgId) {
   // your code here
 }
 
