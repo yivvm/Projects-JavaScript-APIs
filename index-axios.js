@@ -215,8 +215,63 @@ async function retrieveBreedInfo(breedId, breeds) {
 // import axios from 'axios';
 // const axios = require('axios');
 
+// // add request interceptor
+// axios.interceptors.request.use( (request) => {
+//   request.metadata = request.metadata || {};
+//   request.metadata.startTime = new Date().getTime();
+//   console.log('Request initiated at: ', new Date().toISOString());
+//   return request;
+// }, function (error) {
+//   return Promise.reject(error);
+// });
+
+// // add response interceptor
+// axios.interceptors.response.use( (response) => {
+//   response.config.metadata.endTime = new Date().getTime();
+//   console.log('Response received at: ', new Date().toISOString());
+//   const startTime = response.config.metadata.startTime;
+//   if (startTime) {
+//     const durationInMS = new Date() - startTime;
+//     console.log('Time elapsed between request and response: ', durationInMS, 'milliseconds');
+//   }
+//   return response;
+// }, (error) => {
+//   error.config.metadata.endTime = new Date().getTime();
+//   error.config.metadata.durationInMS = error.config.metadata.endTime - error.config.metadata.startTime; 
+//   console.log(`Unsuccessful response..., took ${error.config.metadata.durationInMS} millisecondes.`);
+//   throw error;
+// });
+
+
+/**
+ * 6. Next, we'll create a progress bar to indicate the request is in progress.
+ * - The progressBar element has already been created for you.
+ *  - You need only to modify its "width" style property to align with the request progress.
+ * - In your request interceptor, set the width of the progressBar element to 0%.
+ *  - This is to reset the progress with each request.
+ * - Research the axios onDownloadProgress config option.
+ * - Create a function "updateProgress" that receives a ProgressEvent object.
+ *  - Pass this function to the axios onDownloadProgress config option in your event handler.
+ * - console.log your ProgressEvent object within updateProgess, and familiarize yourself with its structure.
+ *  - Update the progress of the request using the properties you are given.
+ * - Note that we are not downloading a lot of data, so onDownloadProgress will likely only fire
+ *   once or twice per request to this API. This is still a concept worth familiarizing yourself
+ *   with for future projects.
+ */
+
+function updateProgress(event) {
+  const progressPercentage = Math.round((event.loaded * 100) / event.total);
+  progressBar.style.width = `${progressPercentage}%`;
+}
+
 // add request interceptor
 axios.interceptors.request.use( (request) => {
+  // reset the progress with each request.
+  progressBar.style.width = '0%';
+
+  // set up progress tracking
+  request.onDownloadProgress = updateProgress;
+
   request.metadata = request.metadata || {};
   request.metadata.startTime = new Date().getTime();
   console.log('Request initiated at: ', new Date().toISOString());
@@ -242,22 +297,9 @@ axios.interceptors.response.use( (response) => {
   throw error;
 });
 
+axios.get(breedsUrl);
+// axios.get('https://api.thecatapi.com/v1/images/search?limit=10')
 
-/**
- * 6. Next, we'll create a progress bar to indicate the request is in progress.
- * - The progressBar element has already been created for you.
- *  - You need only to modify its "width" style property to align with the request progress.
- * - In your request interceptor, set the width of the progressBar element to 0%.
- *  - This is to reset the progress with each request.
- * - Research the axios onDownloadProgress config option.
- * - Create a function "updateProgress" that receives a ProgressEvent object.
- *  - Pass this function to the axios onDownloadProgress config option in your event handler.
- * - console.log your ProgressEvent object within updateProgess, and familiarize yourself with its structure.
- *  - Update the progress of the request using the properties you are given.
- * - Note that we are not downloading a lot of data, so onDownloadProgress will likely only fire
- *   once or twice per request to this API. This is still a concept worth familiarizing yourself
- *   with for future projects.
- */
 
 /**
  * 7. As a final element of progress indication, add the following to your axios interceptors:
