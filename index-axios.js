@@ -12,7 +12,8 @@ const progressBar = document.getElementById("progressBar");
 const getFavouritesBtn = document.getElementById("getFavouritesBtn");
 
 // Step 0: Store your API key here for reference and easy access.
-const API_KEY = "live_EellOTjtNVybqKeQCOonBZ4M1Iqr3FQfvqTjAcUI8KKjkxkEcWYiwOMKnyhBYPOL";
+// const API_KEY = "live_EellOTjtNVybqKeQCOonBZ4M1Iqr3FQfvqTjAcUI8KKjkxkEcWYiwOMKnyhBYPOL";
+const API_KEY = "DEMO_API_KEY"
 
 
 // from Carousel.js ------------
@@ -457,6 +458,58 @@ function removeFavoriteFromLocalStorage(imageId) {
  *    If that isn't in its own function, maybe it should be so you don't have to
  *    repeat yourself in this section.
  */
+
+getFavouritesBtn.addEventListener('click',getFavourites);
+
+async function getFavourites(API_KEY) {
+  const favUrl = 'https://api.thecatapi.com/v1/';
+
+  try {
+    const response = await axios.get(favUrl, {
+      headers: {
+        'x-api-key': API_KEY,
+      },
+    });
+
+    const favorites = response.data
+    
+    const carousel = document.querySelector('#carouselInner');
+    carousel.innerHTML = ''
+
+    favorites.forEach(async (favorite) => {
+      const imageId = favorite.image_id;
+      await displayImageInCarousel(imageId);
+    })
+  } catch (error) {
+    console.error('error');
+    return [];
+  }
+}
+
+async function displayImageInCarousel(imageId) {
+  const imageUrl = `https://api.thecatapi.com/v1/images/${imageId}`;
+
+  const response = await axios.get(imageUrl, {
+    headers: {
+      'x-api-key': API_KEY,
+    }
+  });
+  const imageData = response.data;
+
+  const carouselItem = document.createElement('div');
+  carouselItem.classList.add('carousel-item');
+
+  const img = document.createElement('img');
+  img.src = imageData.url;
+  img.classList.add('carousel-image');
+  img.alt = 'favorite cat image';
+
+  carouselItem.appendChild(img);
+
+  const carousel = document.querySelector('#carouselInner');
+  carousel.appendChild(carouselItem)
+
+}
 
 /**
  * 10. Test your site, thoroughly!
