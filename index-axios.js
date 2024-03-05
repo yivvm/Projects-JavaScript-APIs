@@ -217,6 +217,8 @@ async function retrieveBreedInfo(breedId, breeds) {
 
 // add request interceptor
 axios.interceptors.request.use( (request) => {
+  request.metadata = request.metadata || {};
+  request.metadata.startTime = new Date().getTime();
   console.log('Request initiated at: ', new Date().toISOString());
   return request;
 }, function (error) {
@@ -225,15 +227,18 @@ axios.interceptors.request.use( (request) => {
 
 // add response interceptor
 axios.interceptors.response.use( (response) => {
+  response.config.metadata.endTime = new Date().getTime();
   console.log('Response received at: ', new Date().toISOString());
   const startTime = response.config.metadata.startTime;
   if (startTime) {
-    const timeDifference = new Date() - startTime;
-    console.log('Time elapsed between request and response: ', timeDifference, 'milliseconds');
+    const durationInMS = new Date() - startTime;
+    console.log('Time elapsed between request and response: ', durationInMS, 'milliseconds');
   }
   return response;
 }, (error) => {
-  console.log('Unsuccessful response...');
+  error.config.metadata.endTime = new Date().getTime();
+  error.config.metadata.durationInMS = error.config.metadata.endTime - error.config.metadata.startTime; 
+  console.log(`Unsuccessful response..., took ${error.config.metadata.durationInMS} millisecondes.`);
   throw error;
 });
 
