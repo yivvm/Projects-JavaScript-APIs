@@ -146,7 +146,11 @@ const breedsUrl = 'https://api.thecatapi.com/v1/breeds';
 
 async function initialLoad() {
   try {
-    const response = await fetch(breedsUrl);
+    const response = await fetch(breedsUrl, {
+      headers: {
+        'x-api-key': API_KEY
+      }
+    });
 
     if (!response.ok) {
       throw new Error('Failed to retrieve breeds.')
@@ -187,8 +191,13 @@ async function retrieveBreedInfo(breedId, breeds) {
   const selectBreedInfo = breeds.find(breed => breed.id === breedId)
   // console.log(selectBreedInfo)
 
-  const breedImgUrl = `https://api.thecatapi.com/v1/images/search?breed_ids=${breedId}`;
-  const response = await fetch(breedImgUrl); 
+  const breedImgUrl = `https://api.thecatapi.com/v1/images/search?limit=100&breed_ids=${breedId}&api_key=${API_KEY}`;
+  const startTime = new Date();
+  const response = await fetch(breedImgUrl, {
+    headers: {
+      metadata: { startTime }
+    }
+  }); 
 
   if (!response.ok) {
     throw new Error('Failed to retrieve breed information.');
@@ -204,21 +213,53 @@ async function retrieveBreedInfo(breedId, breeds) {
   carouselInner.innerHTML = "";
   infoDump.innerHTML = "";
 
-  // For each carousel with breed images
-  breedImg.forEach((info) => {
-    const carouselItem = document.createElement('div');
-    carouselItem.classList.add('carousel-item');
+  // create a div to hold carousel items
+  const imageContainer = document.createElement('div');
+  imageContainer.classList.add('image-container');
 
+  // For each carousel with breed images
+  breedImg.forEach((info, index) => {
     const img = document.createElement('img');
     img.src = info.url;
-    img.classList.add('d-block', 'w-100');
+    img.classList.add('carousel-image');
     img.alt = 'breed image';
+    img.style.display = index === 0 ? 'block' : 'none';  // show 1st image, hide others
 
-    carouselItem.appendChild(img);
-    carouselInner.appendChild(carouselItem);
+    imageContainer.appendChild(img);
+    
   });
 
-  
+  carouselInner.appendChild(imageContainer);
+
+  // show/hide previous and next buttons
+  const prevButton = document.querySelector('.carousel-control-prev');
+  const nextButton = document.querySelector('.carousel-control-next');
+
+  let currentIndex = 0;
+
+  prevButton.addEventListener('click', () => {
+    showImage(currentIndex - 1);
+  })
+
+  nextButton.addEventListener('click', () => {
+    showImage(currentIndex + 1);
+  })
+
+  function showImage(index) {
+    const images = document.querySelectorAll('.carousel-image');
+    if (index < 0) {
+      index = images.length - 1; 
+    } else if (index >= images.length) {
+      index = 0;
+    }
+
+    images.forEach((image, i) => {
+      image.style.display = i === index ? 'block' : 'none';
+    });
+
+    currentIndex = index;
+  }
+
   // Create information session within the infoDump element.
   const infoDumpContent = `
     <h2>${selectBreedInfo.name}</h2>

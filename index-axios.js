@@ -134,9 +134,10 @@ const breedsUrl = 'https://api.thecatapi.com/v1/breeds';
 
 async function initialLoad() {
   try {
-    const response = await axios.get(breedsUrl, {headers: {
-      'x-api-key': API_KEY
-  }});
+    const response = await axios.get(breedsUrl, {
+      headers: {
+        'x-api-key': API_KEY
+    }});
     const breeds = response.data;
     // filter to only include those with an 'image' object
     // const breedsImg = breeds.filter(img => img.image?.url != null);
@@ -168,7 +169,7 @@ async function retrieveBreedInfo(breedId, breeds) {
   const selectBreedInfo = breeds.find(breed => breed.id === breedId)
   // console.log(selectBreedInfo)
 
-  const breedImgUrl = `https://api.thecatapi.com/v1/images/search?limit=100&breed_ids=${breedId}`;
+  const breedImgUrl = `https://api.thecatapi.com/v1/images/search?limit=100&breed_ids=${breedId}&api_key=${API_KEY}`;
   const startTime = new Date();
   const response = await axios.get(breedImgUrl, {
     metadata: { startTime }
