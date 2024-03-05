@@ -1,5 +1,6 @@
 // import * as Carousel from "./Carousel.js";
 // import axios from "axios";
+// import * as bootstrap from 'bootstrap';
 
 // The breed selection input element.
 const breedSelect = document.getElementById("breedSelect");  // place inside the function, guarantee that the element is obtained when the function is called, which is typically after the HTML has been loaded, preventing the "TypeError: null is not an object (evaluating 'breedSelect.appendChild')" error.
@@ -129,13 +130,17 @@ function start() {
  *   by setting a default header with your API key so that you do not have to
  *   send it manually with all of your requests! You can also set a default base URL!
  */
-
 const breedsUrl = 'https://api.thecatapi.com/v1/breeds';
 
 async function initialLoad() {
   try {
-    const response = await axios.get(breedsUrl);
+    const response = await axios.get(breedsUrl, {headers: {
+      'x-api-key': API_KEY
+  }});
     const breeds = response.data;
+    // filter to only include those with an 'image' object
+    // const breedsImg = breeds.filter(img => img.image?.url != null);
+    // console.log(breeds)
 
     breeds.forEach((breed) => {
       const option = document.createElement('option');
@@ -163,13 +168,14 @@ async function retrieveBreedInfo(breedId, breeds) {
   const selectBreedInfo = breeds.find(breed => breed.id === breedId)
   // console.log(selectBreedInfo)
 
-  const breedImgUrl = `https://api.thecatapi.com/v1/images/search?breed_ids=${breedId}`;
+  const breedImgUrl = `https://api.thecatapi.com/v1/images/search?limit=100&breed_ids=${breedId}`;
   const startTime = new Date();
   const response = await axios.get(breedImgUrl, {
     metadata: { startTime }
   });
 
   const breedImg = response.data;
+  console.log(breedImg)
 
   const carouselInner = document.getElementById('carouselInner');
 
@@ -177,21 +183,57 @@ async function retrieveBreedInfo(breedId, breeds) {
   carouselInner.innerHTML = "";
   infoDump.innerHTML = "";
 
-  // for each carousel with breed images
-  breedImg.forEach((info) => {
-    const carouselItem = document.createElement('div');
-    carouselItem.classList.add('carousel-item');
+  // create a div to hold carousel items
+  const imageContainer = document.createElement('div');
+  imageContainer.classList.add('image-container');
 
+  // for each carousel with breed images
+  breedImg.forEach((info, index) => {
     const img = document.createElement('img');
     img.src = info.url;
-    img.classList.add('d-block', 'w-100');
+    img.classList.add('carousel-image');
     img.alt = 'breed image';
+    img.style.display = index === 0 ? 'block' : 'none';  // show 1st image, hide others
 
-    carouselItem.appendChild(img);
-    carouselInner.appendChild(carouselItem);
+    imageContainer.appendChild(img);
   });
 
+  carouselInner.appendChild(imageContainer)
+
+  // show / hide previous and next buttons
+  const prevButton = document.querySelector('.carousel-control-prev');
+  const nextButton = document.querySelector('.carousel-control-next');
+
+  let currentIndex = 0;
+
+  prevButton.addEventListener('click', () => {
+    showImage(currentIndex - 1);
+  })
+
+  nextButton.addEventListener('click', () => {
+    showImage(currentIndex + 1);
+  })
   
+  function showImage(index) {
+    const images = document.querySelectorAll('.carousel-image');
+    if (index < 0) {
+      index = images.length - 1;
+    } else if (index >= images.length) {
+      index = 0;
+    }
+
+    images.forEach((image, i) => {
+      if (i === index) {
+        image.style.display = 'block';
+      } else {
+        image.style.display = 'none'
+      }
+    })
+
+    currentIndex = index;
+
+  }
+
   // create information session within the infoDump element.
   const infoDumpContent = `
     <h2>${selectBreedInfo.name}</h2>
@@ -326,7 +368,44 @@ axios.get(breedsUrl);
  * - You can call this function by clicking on the heart at the top right of any image.
  */
 async function favourite(imgId) {
-  // your code here
+  const apiURL = 'https://api.thecatapi.com/v1/favourites';
+
+  try {
+    // check if image is already favorited
+    const response = await axios.get(apiURL, {
+      params: {
+        image_id: imgId
+      },
+      headers: {
+        'x-api-key': API_KEY
+      }
+    });
+
+    const favorites = response.data;
+    const isFavorited = favorites.some(favorite => favorite.image_id === imgId);
+
+    if (isFavorited) {
+      const favorite = favorites.find(favorite => favorite.image_id === imgId);
+      await axios.delete(`${apiURL}/${favorite.id}`, {
+        headers: {
+          'x-api-key': API_KEY
+        }
+      });
+      console.log(`Image with ID ${imgId} unfavorited successfully.`);
+    } else {
+      await axios.post(apiURL, {
+        image_id: imgId,
+        sub_id: null
+      }, {
+        headers: {
+          'x-api-key': API_KEY
+        }
+      });
+      console.log(`Image with ID ${imgId} favorited successfully.`)
+    }
+  } catch (error) {
+    console.error('error')
+  }
 }
 
 /**

@@ -188,7 +188,7 @@ async function retrieveBreedInfo(breedId, breeds) {
   // console.log(selectBreedInfo)
 
   const breedImgUrl = `https://api.thecatapi.com/v1/images/search?breed_ids=${breedId}`;
-  const response = await fetch(breedImgUrl);
+  const response = await fetch(breedImgUrl); 
 
   if (!response.ok) {
     throw new Error('Failed to retrieve breed information.');
