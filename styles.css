@@ -41,6 +41,11 @@ body {
   width: 100%;
   overflow: hidden;
 }
+
+.carousel-inner {
+
+}
+
 .image-container {
   display: flex;
   width: 100%;  /* image covers the entire container */

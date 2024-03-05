@@ -176,7 +176,7 @@ async function retrieveBreedInfo(breedId, breeds) {
   });
 
   const breedImg = response.data;
-  console.log(breedImg)
+  // console.log(breedImg)
 
   const carouselInner = document.getElementById('carouselInner');
 
@@ -184,6 +184,9 @@ async function retrieveBreedInfo(breedId, breeds) {
   carouselInner.innerHTML = "";
   infoDump.innerHTML = "";
 
+  // get favorite button/icon
+  const favoriteButton = document.getElementById('favorite');
+  
   // create a div to hold carousel items
   const imageContainer = document.createElement('div');
   imageContainer.classList.add('image-container');
@@ -196,10 +199,21 @@ async function retrieveBreedInfo(breedId, breeds) {
     img.alt = 'breed image';
     img.style.display = index === 0 ? 'block' : 'none';  // show 1st image, hide others
 
+    // Add event listener to favorite button
+    favoriteButton.addEventListener('click', async () => {
+      const isFavorited = await favourite(info.id, API_KEY);
+      if (isFavorited) {
+        favoriteButton.classList.add('favorited');
+      } else {
+        favoriteButton.classList.remove('favorited');
+      }
+    });
+
     imageContainer.appendChild(img);
   });
 
   carouselInner.appendChild(imageContainer)
+
 
   // show / hide previous and next buttons
   const prevButton = document.querySelector('.carousel-control-prev');
@@ -368,45 +382,70 @@ axios.get(breedsUrl);
  *   you delete that favourite using the API, giving this function "toggle" functionality.
  * - You can call this function by clicking on the heart at the top right of any image.
  */
-async function favourite(imgId) {
-  const apiURL = 'https://api.thecatapi.com/v1/favourites';
+
+async function favourite(imageId, API_KEY) {
+  const favUrl = 'https://api.thecatapi.com/v1/favourites';
+  const isFavorited = isImageFavorited(imageId);
 
   try {
-    // check if image is already favorited
-    const response = await axios.get(apiURL, {
-      params: {
-        image_id: imgId
-      },
-      headers: {
-        'x-api-key': API_KEY
-      }
-    });
-
-    const favorites = response.data;
-    const isFavorited = favorites.some(favorite => favorite.image_id === imgId);
-
     if (isFavorited) {
-      const favorite = favorites.find(favorite => favorite.image_id === imgId);
-      await axios.delete(`${apiURL}/${favorite.id}`, {
+      const favoriteId = getFavoriteId(imageId);
+      await axios.delete(`${favUrl}/${favoriteId}`, {
         headers: {
-          'x-api-key': API_KEY
-        }
+          'x-api-key': API_KEY,
+        },
       });
-      console.log(`Image with ID ${imgId} unfavorited successfully.`);
+      console.log(`Image ID ${imageId} unfavorited successfully.`)
+      removeFavoriteFromLocalStorage(imageId);
     } else {
-      await axios.post(apiURL, {
-        image_id: imgId,
-        sub_id: null
-      }, {
-        headers: {
-          'x-api-key': API_KEY
+      await axios.post (
+        favUrl,
+        {
+          image_id: imageId,
+          sub_id: null,  // may change it later for a real username
+        },
+        {
+          headers: {
+            'Content-type': 'application/json',
+            'x-api-key': API_KEY,
+          },
         }
-      });
-      console.log(`Image with ID ${imgId} favorited successfully.`)
+      );
+      console.log(`Image ID ${imageId} favorited successfully.`);
+      addFavoriteToLocalStorage(imageId);
     }
+    return !isFavorited;  // Return updated favorite status
   } catch (error) {
-    console.error('error')
+    console.error('error');
+    return isFavorited;  // Return original favorite status
   }
+}
+
+// Check if an image is favorited
+function isImageFavorited(imageId) {
+  const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+  return favorites.includes(imageId);
+}
+
+// Get favorite ID for a given imageID
+function getFavoriteId(imageId) {
+  const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+  const index = favorites.findIndex((id) => id === imageId);
+  return favorites[index];
+}
+
+// Add image to favorites in local storage
+function addFavoriteToLocalStorage(imageId) {
+  let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+  favorites.push(imageId);
+  localStorage.setItem('favorites', JSON.stringify(favorites));
+}
+
+// Remove image from favorites in local storage
+function removeFavoriteFromLocalStorage(imageId) {
+  let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+  favorites = favorites.filter((id) => id !== imageId);
+  localStorage.setItem('favorites', JSON.stringify(favorites));
 }
 
 /**
