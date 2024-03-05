@@ -259,17 +259,26 @@ async function retrieveBreedInfo(breedId, breeds) {
  *   with for future projects.
  */
 
+/**
+ * 7. As a final element of progress indication, add the following to your axios interceptors:
+ * - In your request interceptor, set the body element's cursor style to "progress."
+ * - In your response interceptor, remove the progress cursor style from the body element.
+ */
+
 function updateProgress(event) {
   const progressPercentage = Math.round((event.loaded * 100) / event.total);
   progressBar.style.width = `${progressPercentage}%`;
 }
 
-// add request interceptor
+// Add request interceptor
 axios.interceptors.request.use( (request) => {
-  // reset the progress with each request.
+  // Set the body element's cursor style to "progress"
+  document.body.style.cursor = 'progress';
+
+  // Reset the progress with each request.
   progressBar.style.width = '0%';
 
-  // set up progress tracking
+  // Set up progress tracking
   request.onDownloadProgress = updateProgress;
 
   request.metadata = request.metadata || {};
@@ -289,6 +298,10 @@ axios.interceptors.response.use( (response) => {
     const durationInMS = new Date() - startTime;
     console.log('Time elapsed between request and response: ', durationInMS, 'milliseconds');
   }
+
+  // remove the progress cursor style from body element
+  document.body.style.cursor = 'default';
+  
   return response;
 }, (error) => {
   error.config.metadata.endTime = new Date().getTime();
@@ -301,11 +314,6 @@ axios.get(breedsUrl);
 // axios.get('https://api.thecatapi.com/v1/images/search?limit=10')
 
 
-/**
- * 7. As a final element of progress indication, add the following to your axios interceptors:
- * - In your request interceptor, set the body element's cursor style to "progress."
- * - In your response interceptor, remove the progress cursor style from the body element.
- */
 /**
  * 8. To practice posting data, we'll create a system to "favourite" certain images.
  * - The skeleton of this function has already been created for you.
