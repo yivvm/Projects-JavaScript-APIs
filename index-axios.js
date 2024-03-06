@@ -154,6 +154,7 @@ async function initialLoad() {
     // create event handler for breedSelect
     breedSelect.addEventListener('change', async(e) => {
       const selectBreedId = e.target.value;
+      // console.log(selectBreedId)
       await retrieveBreedInfo(selectBreedId, breeds);
     });
 
@@ -178,6 +179,12 @@ async function retrieveBreedInfo(breedId, breeds) {
 
   const breedImg = response.data;
   // console.log(breedImg)
+
+  if (breedImg.length === 0) {
+    breedImg.push({id: "wikimalayan", url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f9/IMGP1134_%2851750850378%29.jpg/800px-IMGP1134_%2851750850378%29.jpg',  width: 3496, height: 3944});
+  }
+  
+  // console.log(breedImg);
 
   const carouselInner = document.getElementById('carouselInner');
 
