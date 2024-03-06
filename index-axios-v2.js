@@ -181,6 +181,10 @@ async function retrieveBreedInfo(breedId, breeds) {
   const breedImg = response.data;
   // console.log(breedImg)
 
+  if (breedImg.length === 0) {
+    breedImg.push({id: "wikimalayan", url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f9/IMGP1134_%2851750850378%29.jpg/800px-IMGP1134_%2851750850378%29.jpg',  width: 3496, height: 3944});
+  }
+
   const carouselInner = document.getElementById('carouselInner');
 
   // clear exisiting carousel and infoDump content
